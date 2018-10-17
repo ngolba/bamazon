@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
 const serverPassword = require('./keys');
+const cTable = require('console.table');
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -16,18 +17,18 @@ const getAllItemIDs = () => {
     return new Promise((resolve, reject) => {
         connection.query('select item_id from products', (err, res) => {
             if (err) throw err;
-            allItemIDs = res.map(x => x.item_id);
-            resolve(allItemIDs);
+            resolve(res.map(x => x.item_id));
+
         })
     })
 }
 
-const printInventory = () => {
+const printInventory = (ids) => {
+    allItemIDs = ids;
     return new Promise((resolve, reject) => {
         connection.query('select * from products', (err, res) => {
             if (err) throw err;
             console.table(res);
-            // connection.end();
             resolve()
         })
     })
@@ -35,10 +36,13 @@ const printInventory = () => {
 
 const purchase = (item, numPurchased) => {
     item.stock_quantity -= numPurchased;
-    connection.query('update products set ? where ?', {stock_quantity: item.stock_quantity, item_id: item.item_id}, (err, res) => {
+    connection.query('update products set stock_quantity = ? where item_id = ?', [
+        item.stock_quantity,
+        item.item_id
+    ], (err, res) => {
         if (err) throw err;
-        let purchasePrice = (item.price * numPurchased);
-        console.log(`Purchase price: ${purchasePrice}`)
+        let purchasePrice = (item.price * numPurchased).toFixed(2);
+        console.log(`\nPurchase price: \$${purchasePrice}`)
         connection.end();
     })
 }
@@ -47,23 +51,35 @@ const gatherInput = () => {
     inquirer.prompt([{
             type: 'input',
             name: 'itemID',
-            message: 'What is the ID of the item you wish to purchase?'
+            message: 'What is the ID of the item you wish to purchase?',
+            validate: (value) => isNaN(value) ? false : true
         },
         {
             type: 'input',
             name: 'itemQuantity',
-            message: 'How many would you like to purchase?'
+            message: 'How many would you like to purchase?',
+            validate: (value) => isNaN(value) ? false : true
         }
     ]).then(answers => {
-        if (allItemIDs.indexOf(answers.itemID) === -1) {
+        let idAnswered = parseInt(answers.itemID);
+        let quantityAnswered = parseInt(answers.itemQuantity);
+        if (allItemIDs.indexOf(idAnswered) === -1) {
             console.log('Unrecognized Item ID Number');
             gatherInput();
+        } else {
+            connection.query('select * from products where ?', {
+                item_id: idAnswered
+            }, (err, res) => {
+                if (err) throw err;
+                selectedItem = res[0];
+                if (selectedItem.stock_quantity >= quantityAnswered) {
+                    purchase(selectedItem, quantityAnswered)
+                } else {
+                    console.log('Insufficient quantity!')
+                    gatherInput();
+                }
+            })
         }
-        connection.query('select * from products where ?', {item_id: answers.itemID}, (err, res) => {
-            if (err) throw err;
-            selectedItem = res;
-            selectedItem.stock_quantity >= answers.itemQuantity ? purchase(selectedItem, answers.itemQuantity) : console.log('Insufficient quantity!')
-        })
     })
 }
 
@@ -72,7 +88,9 @@ connection.connect((err) => {
     if (err) throw err;
 
     getAllItemIDs()
-        .then((response) => printInventory())
+        .then((response) => printInventory(response))
         .then(() => gatherInput())
 
 });
+
+export {getAllItemIDs};
