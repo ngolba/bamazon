@@ -1,5 +1,4 @@
 const inquirer = require('inquirer');
-const cTable = require('console.table');
 const shared = require('./shared');
 
 const purchase = (item, numPurchased) => {
@@ -8,8 +7,13 @@ const purchase = (item, numPurchased) => {
 
     let purchasePrice = (item.price * numPurchased).toFixed(2);
     console.log(`\nPurchase price: \$${purchasePrice}`)
+    console.log(`\n*********************************************\n`)
 
-    shared.endConnection();
+    inquirer.prompt([{
+        type: 'confirm',
+        name: 'moreTransactions',
+        message: 'Would you like to make another purchase?'
+    }]).then(answers => answers.moreTransactions ? purchaseProcess() : shared.endConnection())
 }
 
 const checkStock = answers => {
@@ -49,7 +53,11 @@ const gatherInput = () => {
 
 }
 
-shared.establishConnection();
-shared.getAllItemIDs()
+const purchaseProcess = () => {
+    shared.getAllItemIDs()
     .then(() => shared.printInventory())
     .then(() => gatherInput())
+}
+
+shared.establishConnection();
+purchaseProcess();
