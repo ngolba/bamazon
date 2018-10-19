@@ -1,4 +1,3 @@
-const mysql = require('mysql');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 const shared = require('./shared');
@@ -13,10 +12,10 @@ const purchase = (item, numPurchased) => {
     shared.endConnection();
 }
 
-const checkInput = (answers) => {
+const checkStock = answers => {
     return new Promise((resolve, reject) => {
         shared.selectItem(answers.itemID)
-            .then((item) => {
+            .then(item => {
                 (item.stock_quantity < answers.itemQuantity) ? reject('Insufficient quantity!'): resolve(item);
             })
     })
@@ -34,12 +33,12 @@ const gatherInput = () => {
             type: 'input',
             name: 'itemQuantity',
             message: 'How many would you like to purchase?',
-            validate: val => isNaN(val) ? false : true,
-            filter: val => parseInt(val)
+            validate: val => (isNaN(val) || !Number.isInteger(val) || val < 0) ? false : true,
+            filter: val => parseFloat(val)
         }
     ]).then(answers => {
-        checkInput(answers)
-            .then((response) => {
+        checkStock(answers)
+            .then(response => {
                 purchase(response, answers.itemQuantity)
             })
             .catch(response => {
