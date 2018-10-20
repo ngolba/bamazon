@@ -2,7 +2,7 @@
 
 -- create database bamazon;
 
-use bamazon;
+-- use bamazon;
 
 -- create table products (
 --     item_id int not null auto_increment,

@@ -1,21 +1,22 @@
 const inquirer = require('inquirer');
 const shared = require('./shared');
+const {updateStock, updateSales, endConnection, selectItem, allItems, getAllItemIDs, printInventory, establishConnection} = shared;
 
 const purchase = (item, numPurchased) => {
 
-    shared.updateStock(numPurchased * -1);
-    shared.updateSales((item.price * numPurchased));
+    updateStock(numPurchased * -1);
+    updateSales((item.price * numPurchased));
     
     inquirer.prompt([{
         type: 'confirm',
         name: 'moreTransactions',
         message: 'Would you like to make another purchase?'
-    }]).then(answers => answers.moreTransactions ? purchaseProcess() : shared.endConnection())
+    }]).then(answers => answers.moreTransactions ? purchaseProcess() : endConnection())
 }
 
 const checkStock = answers => {
     return new Promise((resolve, reject) => {
-        shared.selectItem(answers.itemID)
+        selectItem(answers.itemID)
             .then(item => {
                 (item.stock_quantity < answers.itemQuantity) ? reject('Insufficient quantity!'): resolve(item);
             })
@@ -27,7 +28,7 @@ const gatherInput = () => {
             type: 'input',
             name: 'itemID',
             message: 'What is the ID of the item you wish to purchase?',
-            validate: val => shared.allItems().indexOf(val) === -1 ? false : true,
+            validate: val => allItems().indexOf(val) === -1 ? false : true,
             filter: val => parseInt(val)
         },
         {
@@ -51,10 +52,10 @@ const gatherInput = () => {
 }
 
 const purchaseProcess = () => {
-    shared.getAllItemIDs()
-    .then(() => shared.printInventory())
+    getAllItemIDs()
+    .then(() => printInventory())
     .then(() => gatherInput())
 }
 
-shared.establishConnection();
+establishConnection();
 purchaseProcess();
