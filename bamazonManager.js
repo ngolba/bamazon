@@ -1,12 +1,13 @@
 const inquirer = require('inquirer');
 const shared = require('./shared');
+const {updateStock, selectItem, allDepartments, getAllItemIDs, establishConnection, printInventory, endConnection} = shared;
 
 const proceed = () => {
     inquirer.prompt([{
         type: 'confirm',
         name: 'continue',
         message: 'Would you like to perform another task?'
-    }]).then(answers => answers.continue ? inquireTask() : shared.endConnection())
+    }]).then(answers => answers.continue ? inquireTask() : endConnection())
 }
 
 const addStock = () => {
@@ -14,7 +15,7 @@ const addStock = () => {
             type: 'input',
             name: 'itemID',
             message: 'To which item would you like to add stock?',
-            validate: val => shared.allItems().indexOf(val) === -1 ? false : true,
+            validate: val => allItems().indexOf(val) === -1 ? false : true,
             filter: val => parseInt(val)
         },
         {
@@ -25,9 +26,9 @@ const addStock = () => {
             filter: val => parseInt(val)
         }
     ]).then(answers => {
-        shared.selectItem(answers.itemID).then((item) => {
+        selectItem(answers.itemID).then((item) => {
             console.log(`${answers.stockAdded} ${item.product_name} ADDED`)
-            shared.updateStock(answers.stockAdded);
+            updateStock(answers.stockAdded);
             proceed();
         })
     })
@@ -42,7 +43,7 @@ const addNewProduct = () => {
             type: 'list',
             name: 'department',
             message: 'Select the department',
-            choices: shared.allDepartments()
+            choices: allDepartments()
         },
         {
             type: 'input',
@@ -59,14 +60,14 @@ const addNewProduct = () => {
             filter: val => parseFloat(val)
         }
     ]).then(answers => {
-        shared.newItem(answers.name, answers.department, answers.price, answers.quantity)
+        newItem(answers.name, answers.department, answers.price, answers.quantity)
         setTimeout(() => proceed(), 1000);
     })
 }
 
 const inquireTask = () => {
-    shared.getAllItemIDs()
-        .then(() => shared.getAllDepartments())
+    getAllItemIDs()
+        .then(() => getAllDepartments())
         .then(() => {
             inquirer.prompt([{
                 type: 'list',
@@ -76,24 +77,24 @@ const inquireTask = () => {
             }]).then(answers => {
                 switch (answers.task) {
                     case 'View Products for Sale':
-                        shared.printInventory(true).then(() => proceed());
+                        printInventory(true).then(() => proceed());
                         break;
                     case 'View Low Inventory':
-                        shared.printInventory(true, ' where stock_quantity < 5').then(() => proceed());
+                        printInventory(true, ' where stock_quantity < 5').then(() => proceed());
                         break;
                     case 'Add to Inventory':
-                        shared.printInventory(true).then(() => addStock())
+                        printInventory(true).then(() => addStock())
                         break;
                     case 'Add New Product':
                         addNewProduct();
                         break;
                     default: 
                         console.log('Goodbye!');
-                        shared.endConnection();
+                        endConnection();
                 }
             })
         })
 }
 
-shared.establishConnection()
+establishConnection()
 inquireTask()
