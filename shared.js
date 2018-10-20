@@ -2,11 +2,11 @@ const mysql = require('mysql')
 const serverPassword = require('./keys');
 const cTable = require('console.table');
 
-const sharedAssets = (() => {
-    let allItemIDs = [];
-    let allDepartmentNames = [];
-    let currentItem = {};
-    const connection = mysql.createConnection({
+const sharedAssets = () => {
+    let allItemIDs = [],
+    allDepartmentNames = [],
+    currentItem = {},
+    connection = mysql.createConnection({
         host: "localhost",
         port: 3306,
         user: "root",
@@ -138,6 +138,6 @@ const sharedAssets = (() => {
         printDepartmentSales: printDepartmentSales,
         newDepartment: newDepartment
     }
-})()
+}
 
-module.exports = sharedAssets;
+module.exports = sharedAssets();

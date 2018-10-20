@@ -1,6 +1,5 @@
 const inquirer = require('inquirer');
 const shared = require('./shared');
-
 const {updateStock, updateSales, endConnection, selectItem, allItems, getAllItemIDs, printInventory, establishConnection} = shared;
 
 const purchase = (item, numPurchased) => {
