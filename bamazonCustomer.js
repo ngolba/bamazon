@@ -2,13 +2,10 @@ const inquirer = require('inquirer');
 const shared = require('./shared');
 
 const purchase = (item, numPurchased) => {
-    item.stock_quantity -= numPurchased;
-    shared.updateStock(item.stock_quantity);
 
-    let purchasePrice = (item.price * numPurchased).toFixed(2);
-    console.log(`\nPurchase price: \$${purchasePrice}`)
-    console.log(`\n*********************************************\n`)
-
+    shared.updateStock(numPurchased);
+    shared.updateSales((item.price * numPurchased));
+    
     inquirer.prompt([{
         type: 'confirm',
         name: 'moreTransactions',

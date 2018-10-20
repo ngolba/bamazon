@@ -44,9 +44,10 @@ const sharedAssets = (() => {
         })
     }
 
-    printInventory = (stipulation = '') => {
+    printInventory = (managerPrivileges = false, stipulation = '') => {
         return new Promise((resolve, reject) => {
-            let query = 'select * from products' + stipulation;
+
+            let query = (managerPrivileges ? 'select * ' : 'select item_id, product_name, department_name, price, stock_quantity') + `from products ${stipulation}`;
             connection.query(query, (err, res) => {
                 if (err) throw err;
                 console.log(`\n`);
@@ -70,10 +71,21 @@ const sharedAssets = (() => {
 
     updateStock = quantity => {
         connection.query('update products set stock_quantity = ? where item_id = ?',
-            [quantity, currentItem.item_id],
+            [currentItem.stock_quantity -= quantity, currentItem.item_id],
             (err, res) => {
                 if (err) throw err;
             })
+    }
+
+    updateSales = purchasePrice => {
+        console.log(`\nPurchase price: \$${purchasePrice.toFixed(2)}`)
+        console.log(`\n*********************************************\n`)
+        connection.query('update products set product_sales = ? where item_id = ?',
+            [currentItem.product_sales += purchasePrice, currentItem.item_id],
+            (err, res) => {
+                if (err) throw err;
+            }
+        )
     }
 
     newItem = (name, department, price, stock) => {
@@ -85,6 +97,9 @@ const sharedAssets = (() => {
             }
         )
     }
+
+    updateDepartmentSales = () => {}
+
 
     endConnection = () => connection.end();
 
@@ -99,7 +114,9 @@ const sharedAssets = (() => {
         endConnection: endConnection,
         getAllDepartments: getAllDepartments,
         allDepartments: allDepartments,
-        newItem: newItem
+        newItem: newItem,
+        updateSales: updateSales,
+        updateDepartmentSales: updateDepartmentSales
     }
 })()
 

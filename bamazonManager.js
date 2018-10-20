@@ -77,13 +77,13 @@ const inquireTask = () => {
             }]).then(answers => {
                 switch (answers.task) {
                     case 'View Products for Sale':
-                        shared.printInventory().then(() => proceed());
+                        shared.printInventory(true).then(() => proceed());
                         break;
                     case 'View Low Inventory':
-                        shared.printInventory(' where stock_quantity < 5').then(() => proceed());
+                        shared.printInventory(true, ' where stock_quantity < 5').then(() => proceed());
                         break;
                     case 'Add to Inventory':
-                        shared.printInventory().then(() => addStock())
+                        shared.printInventory(true).then(() => addStock())
                         break;
                     case 'Add New Product':
                         addNewProduct();
