@@ -31,8 +31,9 @@ use bamazon;
 -- UPDATE products set product_sales = 100 where item_id = 1;
 -- UPDATE products set product_sales = 200 where item_id = 2;
 -- UPDATE products set product_sales = 300 where item_id = 3;
-ALTER TABLE departments add product_sales FLOAT(10,2) default 0;
+-- ALTER TABLE departments add product_sales FLOAT(10,2) default 0;
 -- ALTER TABLE products MODIFY product_sales float(10, 2) not null default 0;
+-- ALTER table departments drop COLUMN product_sales;
 
 -- insert into departments (department_name, over_head_costs)
 -- VALUES ('Toys', 100), ('Clothing', 500), ('Electronics', 3000), ('Kitchen', 2000), ('Media', 300);

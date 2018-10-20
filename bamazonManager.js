@@ -26,9 +26,8 @@ const addStock = () => {
         }
     ]).then(answers => {
         shared.selectItem(answers.itemID).then((item) => {
-            item.stock_quantity += answers.stockAdded;
             console.log(`${answers.stockAdded} ${item.product_name} ADDED`)
-            shared.updateStock(item.stock_quantity);
+            shared.updateStock(answers.stockAdded);
             proceed();
         })
     })

@@ -3,7 +3,7 @@ const shared = require('./shared');
 
 const purchase = (item, numPurchased) => {
 
-    shared.updateStock(numPurchased);
+    shared.updateStock(numPurchased * -1);
     shared.updateSales((item.price * numPurchased));
     
     inquirer.prompt([{

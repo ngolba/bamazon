@@ -47,7 +47,7 @@ const sharedAssets = (() => {
     printInventory = (managerPrivileges = false, stipulation = '') => {
         return new Promise((resolve, reject) => {
 
-            let query = (managerPrivileges ? 'select * ' : 'select item_id, product_name, department_name, price, stock_quantity') + `from products ${stipulation}`;
+            let query = (managerPrivileges ? 'select * ' : 'select item_id, product_name, department_name, price, stock_quantity ') + `from products ${stipulation}`;
             connection.query(query, (err, res) => {
                 if (err) throw err;
                 console.log(`\n`);
@@ -71,7 +71,7 @@ const sharedAssets = (() => {
 
     updateStock = quantity => {
         connection.query('update products set stock_quantity = ? where item_id = ?',
-            [currentItem.stock_quantity -= quantity, currentItem.item_id],
+            [currentItem.stock_quantity += quantity, currentItem.item_id],
             (err, res) => {
                 if (err) throw err;
             })
@@ -98,10 +98,29 @@ const sharedAssets = (() => {
         )
     }
 
-    updateDepartmentSales = () => {}
-
-
     endConnection = () => connection.end();
+
+    printDepartmentSales = () => {
+        connection.query('select d.department_id, d.department_name, d.over_head_costs, sum(p.product_sales) as product_sales, (sum(p.product_sales) - d.over_head_costs) as total_profit from departments as d left join products as p on d.department_name=p.department_name group by d.department_name',
+            (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                endConnection();
+            }
+        )
+    }
+
+    newDepartment = (name, overHead) => {
+        connection.query('insert into departments (department_name, over_head_costs)  values (?, ?)', 
+        [name, overHead], 
+        (err, res) => {
+            if (err) throw err;
+            console.log('New department added.')
+            endConnection();
+        })
+    }
+
+    
 
 
     return {
@@ -116,7 +135,8 @@ const sharedAssets = (() => {
         allDepartments: allDepartments,
         newItem: newItem,
         updateSales: updateSales,
-        updateDepartmentSales: updateDepartmentSales
+        printDepartmentSales: printDepartmentSales,
+        newDepartment: newDepartment
     }
 })()
 
