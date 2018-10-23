@@ -3,10 +3,10 @@ const serverPassword = require('./keys');
 const cTable = require('console.table');
 
 const sharedAssets = () => {
-    let allItemIDs = [],
-    allDepartmentNames = [],
-    currentItem = {},
-    connection = mysql.createConnection({
+    let allItemIDs = []
+    let allDepartmentNames = []
+    let currentItem = {}
+    const connection = mysql.createConnection({
         host: "localhost",
         port: 3306,
         user: "root",
@@ -14,17 +14,17 @@ const sharedAssets = () => {
         database: "bamazon"
     });
 
-    allItems = () => allItemIDs;
-    allDepartments = () => allDepartmentNames;
-    selectedItem = () => currentItem;
+    const allItems = () => allItemIDs;
+    const allDepartments = () => allDepartmentNames;
+    const selectedItem = () => currentItem;
 
-    establishConnection = () => {
+    const establishConnection = () => {
         connection.connect((err) => {
             if (err) throw err;
         })
     }
 
-    getAllItemIDs = () => {
+    const getAllItemIDs = () => {
         return new Promise((resolve, reject) => {
             connection.query('select item_id from products', (err, res) => {
                 if (err) throw err;
@@ -34,7 +34,7 @@ const sharedAssets = () => {
         })
     }
 
-    getAllDepartments = () => {
+    const getAllDepartments = () => {
         return new Promise((resolve, reject) => {
             connection.query('select distinct department_name from products', (err, res) => {
                 if (err) throw err;
@@ -44,7 +44,7 @@ const sharedAssets = () => {
         })
     }
 
-    printInventory = (managerPrivileges = false, stipulation = '') => {
+    const printInventory = (managerPrivileges = false, stipulation = '') => {
         return new Promise((resolve, reject) => {
 
             let query = (managerPrivileges ? 'select * ' : 'select item_id, product_name, department_name, price, stock_quantity ') + `from products ${stipulation}`;
@@ -57,7 +57,7 @@ const sharedAssets = () => {
         })
     }
 
-    selectItem = id => {
+    const selectItem = id => {
         return new Promise((resolve, reject) => {
             connection.query('select * from products where ?', {
                 item_id: id
@@ -69,7 +69,7 @@ const sharedAssets = () => {
         })
     }
 
-    updateStock = quantity => {
+    const updateStock = quantity => {
         connection.query('update products set stock_quantity = ? where item_id = ?',
             [currentItem.stock_quantity += quantity, currentItem.item_id],
             (err, res) => {
@@ -77,7 +77,7 @@ const sharedAssets = () => {
             })
     }
 
-    updateSales = purchasePrice => {
+    const updateSales = purchasePrice => {
         console.log(`\nPurchase price: \$${purchasePrice.toFixed(2)}`)
         console.log(`\n*********************************************\n`)
         connection.query('update products set product_sales = ? where item_id = ?',
@@ -88,7 +88,7 @@ const sharedAssets = () => {
         )
     }
 
-    newItem = (name, department, price, stock) => {
+    const newItem = (name, department, price, stock) => {
         connection.query('insert into products (product_name, department_name, price, stock_quantity) values (?, ?, ?, ?)',
             [name, department, price, stock],
             (err, res) => {
@@ -98,9 +98,9 @@ const sharedAssets = () => {
         )
     }
 
-    endConnection = () => connection.end();
+    const endConnection = () => connection.end();
 
-    printDepartmentSales = () => {
+    const printDepartmentSales = () => {
         connection.query('select d.department_id, d.department_name, d.over_head_costs, sum(p.product_sales) as product_sales, (sum(p.product_sales) - d.over_head_costs) as total_profit from departments as d left join products as p on d.department_name=p.department_name group by d.department_name',
             (err, res) => {
                 if (err) throw err;
@@ -110,7 +110,7 @@ const sharedAssets = () => {
         )
     }
 
-    newDepartment = (name, overHead) => {
+    const newDepartment = (name, overHead) => {
         connection.query('insert into departments (department_name, over_head_costs)  values (?, ?)', 
         [name, overHead], 
         (err, res) => {
@@ -120,23 +120,20 @@ const sharedAssets = () => {
         })
     }
 
-    
-
-
     return {
-        establishConnection: establishConnection,
-        getAllItemIDs: getAllItemIDs,
-        printInventory: printInventory,
-        allItems: allItems,
-        selectItem: selectItem,
-        updateStock: updateStock,
-        endConnection: endConnection,
-        getAllDepartments: getAllDepartments,
-        allDepartments: allDepartments,
-        newItem: newItem,
-        updateSales: updateSales,
-        printDepartmentSales: printDepartmentSales,
-        newDepartment: newDepartment
+        establishConnection,
+        getAllItemIDs,
+        printInventory,
+        allItems,
+        selectItem,
+        updateStock,
+        endConnection,
+        getAllDepartments,
+        allDepartments,
+        newItem,
+        updateSales,
+        printDepartmentSales,
+        newDepartment
     }
 }
 

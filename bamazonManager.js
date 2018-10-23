@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 const shared = require('./shared');
-const {updateStock, selectItem, allDepartments, getAllItemIDs, establishConnection, printInventory, endConnection} = shared;
+const {updateStock, selectItem, allDepartments, getAllItemIDs, getAllDepartments, establishConnection, printInventory, endConnection} = shared;
 
 const proceed = () => {
     inquirer.prompt([{
